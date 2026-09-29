@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hotel Smart NFC - Sistema Administrativo</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Top Navigation Bar -->
+    <header class="topbar">
+        <div class="brand">
+            <div class="brand-badge">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                    <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                </svg>
+            </div>
+            <div class="brand-text">
+                <h1>NFC Grand Hotel</h1>
+                <span>Gestión Hotelera Inteligente</span>
+            </div>
+        </div>
+
+        <div class="topbar-actions">
+            <div class="system-status">
+                <span class="live-dot"></span>
+                <span>Servidor en Línea &bull; Arduino Listo</span>
+            </div>
+            <button class="btn btn-outline-light btn-sm" id="btn-quick-refresh" title="Recargar Datos">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                </svg>
+                Actualizar
+            </button>
+        </div>
+    </header>
+
+    <div class="app-layout">
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Metrics Cards Row -->
+            <section class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-icon total-icon">🏢</div>
+                    <div class="metric-data">
+                        <span class="metric-label">Total Habitaciones</span>
+                        <h2 id="stat-total">0</h2>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-icon libre-icon">✨</div>
+                    <div class="metric-data">
+                        <span class="metric-label">Disponibles</span>
+                        <h2 id="stat-libres" class="text-success">0</h2>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-icon usada-icon">🔑</div>
+                    <div class="metric-data">
+                        <span class="metric-label">Ocupadas (NFC)</span>
+                        <h2 id="stat-usadas" class="text-danger">0</h2>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-icon limpieza-icon">🧹</div>
+                    <div class="metric-data">
+                        <span class="metric-label">En Limpieza</span>
+                        <h2 id="stat-limpieza" class="text-warning">0</h2>
+                    </div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="metric-icon ocupacion-icon">📊</div>
+                    <div class="metric-data">
+                        <span class="metric-label">Ocupación Hotel</span>
+                        <h2 id="stat-ocupacion">0%</h2>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Navigation Tabs -->
+            <div class="nav-tabs">
+                <button class="tab-btn active" data-tab="tab-habitaciones">Habitaciones & Control</button>
+                <button class="tab-btn" data-tab="tab-emision">Emisión de Tarjeta NFC</button>
+                <button class="tab-btn" data-tab="tab-servicios">Catálogo de Servicios (XML)</button>
+                <button class="tab-btn" data-tab="tab-arduino">Simulador de Acceso Arduino</button>
+                <button class="tab-btn" data-tab="tab-historial">Historial y Auditoría</button>
+            </div>
+
+            <!-- TAB 1: Habitaciones -->
+            <div class="tab-pane active" id="tab-habitaciones">
+                <div class="section-toolbar">
+                    <div class="filter-group">
+                        <label for="filter-estado">Filtrar por estado:</label>
+                        <select id="filter-estado" class="form-select-sm">
+                            <option value="Todos">Todas las habitaciones</option>
+                            <option value="Libre">Disponibles (Libre)</option>
+                            <option value="Usada">En Uso (Usada)</option>
+                            <option value="Limpieza">En Limpieza</option>
+                            <option value="Mantenimiento">Mantenimiento</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary" id="btn-abrir-crear-hab">
+                        + Nueva Habitación
+                    </button>
+                </div>
+
+                <div class="rooms-container" id="rooms-container">
+                    <!-- Tarjetas de habitaciones renderizadas dinámicamente -->
+                </div>
+            </div>
+
+            <!-- TAB 2: Emisión NFC -->
+            <div class="tab-pane" id="tab-emision">
+                <div class="card-glass max-w-700 mx-auto">
+                    <div class="card-header">
+                        <div class="icon-circle">💳</div>
+                        <div>
+                            <h3>Generar y Asignar Tarjeta NFC</h3>
+                            <p class="subtitle">Emite una nueva llave NFC digital y vincula al huésped</p>
+                        </div>
+                    </div>
+
+                    <form id="form-nfc-issue" class="form-body">
+                        <div class="form-grid">
+                            <div class="form-field">
+                                <label for="nfc-select-room">Habitación a Asignar *</label>
+                                <select id="nfc-select-room" required>
+                                    <option value="">Selecciona habitación disponible</option>
+                                </select>
+                            </div>
+                            <div class="form-field">
+                                <div class="label-with-counter">
+                                    <label for="nfc-guest-name">Nombre y Apellido del Huésped *</label>
+                                    <span class="char-counter" id="guest-char-counter">0/50</span>
+                                </div>
+                                <input type="text" id="nfc-guest-name" placeholder="Ej. Roberto Sánchez" maxlength="50" required autocomplete="off">
+                            </div>
+                        </div>
+
+                        <!-- Date Calendar Pickers -->
+                        <div class="form-grid">
+                            <div class="form-field">
+                                <label for="nfc-date-checkin">Fecha de Llegada (Check-in) *</label>
+                                <input type="date" id="nfc-date-checkin" required>
+                            </div>
+                            <div class="form-field">
+                                <label for="nfc-date-checkout">Fecha de Salida (Check-out) *</label>
+                                <input type="date" id="nfc-date-checkout" required>
+                            </div>
+                        </div>
+
+                        <!-- Time Pickers -->
+                        <div class="form-grid">
+                            <div class="form-field">
+                                <label for="nfc-time-checkin">Hora Estimada Entrada</label>
+                                <input type="time" id="nfc-time-checkin" value="14:00">
+                            </div>
+                            <div class="form-field">
+                                <label for="nfc-time-checkout">Hora Límite Salida</label>
+                                <input type="time" id="nfc-time-checkout" value="12:00">
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary btn-block">
+                                Grabar y Activar Llave NFC
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Tarjeta NFC Visual de Salida -->
+                    <div id="virtual-nfc-card" class="virtual-key-card hidden">
+                        <div class="key-card-header">
+                            <span class="hotel-chip">SMART HOTEL KEY</span>
+                            <span class="nfc-symbol">📶 NFC PASS</span>
+                        </div>
+                        <div class="key-card-code" id="display-nfc-code">NFC-000-0000000</div>
+                        <div class="key-card-info">
+                            <div>
+                                <small>HUÉSPED</small>
+                                <div id="display-nfc-guest">Nombre Huésped</div>
+                            </div>
+                            <div>
+                                <small>HABITACIÓN</small>
+                                <div id="display-nfc-room">#101</div>
+                            </div>
+                            <div>
+                                <small>FECHA</small>
+                                <div id="display-nfc-date">28/09/2026</div>
+                            </div>
+                        </div>
+                        <div class="key-card-actions">
+                            <button class="btn btn-sm btn-outline-light" id="btn-copy-code">Copiar Código</button>
+                            <button class="btn btn-sm btn-accent" id="btn-send-to-arduino">Probar en Lector</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB: Catálogo de Servicios (Marcado Extensible XML) -->
+            <div class="tab-pane" id="tab-servicios">
+                <div class="section-toolbar">
+                    <div class="filter-group">
+                        <label for="filter-capacidad-xml">Capacidad mínima de personas:</label>
+                        <select id="filter-capacidad-xml" class="form-select-sm">
+                            <option value="0">Todas las capacidades</option>
+                            <option value="2">2 o más personas</option>
+                            <option value="4">4 o más personas</option>
+                            <option value="5">5 o más personas</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-outline-light btn-sm" id="btn-reload-xml">
+                        🔄 Recargar Catálogo XML
+                    </button>
+                </div>
+
+                <div class="xml-status-bar" id="xml-status-message">
+                    Cargando especificación de servicios desde archivo XML...
+                </div>
+
+                <div class="services-catalog-grid" id="services-xml-container">
+                    <!-- Tarjetas cargadas dinámicamente desde servicios.xml -->
+                </div>
+            </div>
+
+            <!-- TAB 3: Arduino Físico & Simulador -->
+            <div class="tab-pane" id="tab-arduino">
+                <!-- Tarjeta de Conexión Física USB (Arduino Uno) -->
+                <div class="card-glass max-w-700 mx-auto mb-4">
+                    <div class="card-header">
+                        <div class="icon-circle">🔌</div>
+                        <div>
+                            <h3>Lector Físico Arduino Uno (USB / Serie)</h3>
+                            <p class="subtitle">Conecta tu Arduino Uno directamente a este servidor para leer tarjetas en vivo</p>
+                        </div>
+                    </div>
+
+                    <div class="arduino-serial-controls">
+                        <div class="form-grid">
+                            <div class="form-field">
+                                <label for="select-com-port">Puerto COM Detectado</label>
+                                <div class="com-select-row">
+                                    <select id="select-com-port">
+                                        <option value="">Buscando puertos...</option>
+                                    </select>
+                                    <button class="btn btn-outline-light btn-sm" id="btn-scan-ports" title="Refrescar Puertos COM">🔄</button>
+                                </div>
+                            </div>
+                            <div class="form-field">
+                                <label>Estado del Dispositivo</label>
+                                <div class="device-status-badge" id="arduino-badge-status">
+                                    <span class="status-indicator-dot red" id="arduino-dot"></span>
+                                    <span id="arduino-status-text">Desconectado</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-actions mt-3">
+                            <button class="btn btn-primary" id="btn-connect-arduino">Conectar Arduino</button>
+                            <button class="btn btn-outline-light hidden" id="btn-disconnect-arduino">Desconectar</button>
+                        </div>
+                    </div>
+
+                    <!-- Última lectura física en tiempo real -->
+                    <div id="live-serial-card" class="live-serial-box hidden">
+                        <div class="live-serial-header">
+                            <span>📡 ÚLTIMA TARJETA DETECTADA POR ARDUINO</span>
+                            <span class="live-time" id="serial-card-time">--:--:--</span>
+                        </div>
+                        <div class="live-serial-body">
+                            <div class="live-code" id="serial-card-code">NFC-000-0000000</div>
+                            <div class="live-details">
+                                <span id="serial-card-guest">Huésped: Juan Pérez</span> &bull; 
+                                <span id="serial-card-room">Habitación: #101</span>
+                            </div>
+                            <div class="live-access-result" id="serial-card-result">✅ ACCESO CONCEDIDO</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tarjeta Simulador Manual -->
+                <div class="card-glass max-w-700 mx-auto">
+                    <div class="card-header">
+                        <div class="icon-circle">🤖</div>
+                        <div>
+                            <h3>Simulador Manual de Tarjeta</h3>
+                            <p class="subtitle">Prueba la verificación de accesos sin tener el Arduino conectado</p>
+                        </div>
+                    </div>
+
+                    <div class="arduino-box">
+                        <div class="nfc-reader-graphic">
+                            <div class="scan-area" id="scan-trigger">
+                                <div class="wave"></div>
+                                <span class="sensor-icon">📡</span>
+                                <p>Coloca la tarjeta o escribe el código NFC</p>
+                            </div>
+                        </div>
+
+                        <div class="reader-input-row">
+                            <input type="text" id="arduino-input-code" placeholder="NFC-101-7649231" class="font-mono">
+                            <button class="btn btn-success" id="btn-arduino-scan">Validar Tarjeta</button>
+                        </div>
+
+                        <div id="arduino-feedback" class="status-box hidden">
+                            <!-- Feedback dinámico -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 4: Historial -->
+            <div class="tab-pane" id="tab-historial">
+                <div class="two-columns-tables">
+                    <!-- Intentos de acceso -->
+                    <div class="panel-box">
+                        <div class="panel-box-header">
+                            <h3>Accesos en Puertas (Arduino Logs)</h3>
+                            <button class="btn btn-outline-light btn-xs" id="btn-refresh-intentos">Refrescar</button>
+                        </div>
+                        <div class="table-container">
+                            <table class="styled-table">
+                                <thead>
+                                    <tr>
+                                        <th>Hora</th>
+                                        <th>Hab</th>
+                                        <th>Huésped</th>
+                                        <th>Resultado</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table-intentos-body">
+                                    <tr><td colspan="4" class="text-center">Cargando registros...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Tarjetas Emitidas -->
+                    <div class="panel-box">
+                        <div class="panel-box-header">
+                            <h3>Tarjetas NFC Emitidas</h3>
+                            <button class="btn btn-outline-light btn-xs" id="btn-refresh-tarjetas">Refrescar</button>
+                        </div>
+                        <div class="table-container">
+                            <table class="styled-table">
+                                <thead>
+                                    <tr>
+                                        <th>Código</th>
+                                        <th>Hab</th>
+                                        <th>Huésped</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table-tarjetas-body">
+                                    <tr><td colspan="4" class="text-center">Cargando tarjetas...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Crear Habitación -->
+    <div id="modal-room" class="modal-overlay hidden">
+        <div class="modal-window">
+            <div class="modal-header">
+                <h3>Agregar Nueva Habitación</h3>
+                <button class="btn-close" id="btn-modal-close">&times;</button>
+            </div>
+            <form id="form-create-room">
+                <div class="form-field">
+                    <div class="label-with-counter">
+                        <label for="room-num">Número de Habitación *</label>
+                        <span class="char-counter" id="room-char-counter">0/8</span>
+                    </div>
+                    <input type="text" id="room-num" placeholder="Ej. 301" maxlength="8" required autocomplete="off">
+                </div>
+                <div class="form-grid">
+                    <div class="form-field">
+                        <label for="room-type">Tipo</label>
+                        <select id="room-type">
+                            <option value="Estándar">Estándar</option>
+                            <option value="Doble">Doble</option>
+                            <option value="Suite">Suite</option>
+                            <option value="Presidencial">Presidencial</option>
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label for="room-floor">Piso</label>
+                        <input type="number" id="room-floor" value="1" min="1">
+                    </div>
+                </div>
+                <div class="form-field">
+                    <label for="room-price">Precio por Noche ($)</label>
+                    <input type="number" id="room-price" value="65.00" step="5">
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline-light" id="btn-modal-cancel">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar Habitación</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script type="module" src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

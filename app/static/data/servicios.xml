@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Catalogo de Configuracion y Servicios de Habitaciones Hotel Smart NFC -->
+<hotelServices>
+    <categoria id="CAT-01">
+        <nombre>Habitación Estándar</nombre>
+        <descripcion>Alojamiento cómodo e individual o en pareja, con cerradura inteligente NFC, wifi de alta velocidad y escritorio de trabajo.</descripcion>
+        <capacidadMax>2</capacidadMax>
+        <tarifaBase>45.00</tarifaBase>
+        <serviciosIncluidos>
+            <servicio>Wifi 500Mbps</servicio>
+            <servicio>Acceso Smart NFC 24/7</servicio>
+            <servicio>Aire Acondicionado</servicio>
+        </serviciosIncluidos>
+    </categoria>
+
+    <categoria id="CAT-02">
+        <nombre>Habitación Doble</nombre>
+        <descripcion>Espacio amplio con dos camas queen, ideal para familias o grupos de negocios, equipada con control de accesos automatizado.</descripcion>
+        <capacidadMax>4</capacidadMax>
+        <tarifaBase>65.00</tarifaBase>
+        <serviciosIncluidos>
+            <servicio>Wifi 500Mbps</servicio>
+            <servicio>Acceso Smart NFC 24/7</servicio>
+            <servicio>Smart TV 55"</servicio>
+            <servicio>Frigobar</servicio>
+        </serviciosIncluidos>
+    </categoria>
+
+    <categoria id="CAT-03">
+        <nombre>Junior Suite</nombre>
+        <descripcion>Confort superior con sala de estar independiente, balcón con vista panorámica y llave digital encriptada para Arduino.</descripcion>
+        <capacidadMax>3</capacidadMax>
+        <tarifaBase>110.00</tarifaBase>
+        <serviciosIncluidos>
+            <servicio>Wifi 1Gbps</servicio>
+            <servicio>Desayuno Buffet Incluido</servicio>
+            <servicio>Acceso Smart NFC Prioritario</servicio>
+            <servicio>Tina de Hidromasaje</servicio>
+        </serviciosIncluidos>
+    </categoria>
+
+    <categoria id="CAT-04">
+        <nombre>Master Suite</nombre>
+        <descripcion>Lujo y amplitud con dos recámaras, tecnología domótica y registro de aperturas en tiempo real.</descripcion>
+        <capacidadMax>5</capacidadMax>
+        <tarifaBase>180.00</tarifaBase>
+        <serviciosIncluidos>
+            <servicio>Wifi 1Gbps</servicio>
+            <servicio>Desayuno Buffet &amp; Room Service</servicio>
+            <servicio>Parqueo Privado</servicio>
+            <servicio>Cerradura Biométrica y NFC</servicio>
+        </serviciosIncluidos>
+    </categoria>
+
+    <categoria id="CAT-05">
+        <nombre>Suite Presidencial</nombre>
+        <descripcion>La máxima experiencia hotelera con vista panorámica completa, servicio de concierge personalizado y máxima seguridad.</descripcion>
+        <capacidadMax>6</capacidadMax>
+        <tarifaBase>250.00</tarifaBase>
+        <serviciosIncluidos>
+            <servicio>Servicio VIP 24 Horas</servicio>
+            <servicio>Acceso Smart NFC Exclusivo</servicio>
+            <servicio>Jacuzzi Panorámico</servicio>
+            <servicio>Minibar Premium Ilimitado</servicio>
+            <servicio>Transporte Ejecutivo al Aeropuerto</servicio>
+        </serviciosIncluidos>
+    </categoria>
+</hotelServices>
